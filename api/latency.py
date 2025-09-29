@@ -44,11 +44,15 @@ TELEMETRY_DATA = [
 ]
 
 class handler(BaseHTTPRequestHandler):
-    def do_OPTIONS(self):
-        self.send_response(200)
+    def _set_cors_headers(self):
         self.send_header('Access-Control-Allow-Origin', '*')
         self.send_header('Access-Control-Allow-Methods', 'POST, OPTIONS')
         self.send_header('Access-Control-Allow-Headers', 'Content-Type')
+        self.send_header('Access-Control-Max-Age', '86400')
+    
+    def do_OPTIONS(self):
+        self.send_response(200)
+        self._set_cors_headers()
         self.end_headers()
 
     def do_POST(self):
@@ -87,13 +91,13 @@ class handler(BaseHTTPRequestHandler):
             
             self.send_response(200)
             self.send_header('Content-Type', 'application/json')
-            self.send_header('Access-Control-Allow-Origin', '*')
+            self._set_cors_headers()
             self.end_headers()
             self.wfile.write(json.dumps(result).encode())
             
         except Exception as e:
             self.send_response(500)
             self.send_header('Content-Type', 'application/json')
-            self.send_header('Access-Control-Allow-Origin', '*')
+            self._set_cors_headers()
             self.end_headers()
             self.wfile.write(json.dumps({'error': str(e)}).encode())
